@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+    command: /usr/bin/env sh -c "exec uvicorn main:app --host 0.0.0.0 --port 8000 --root-path /api"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app
+    env_file: .env
+
+  db:
+    image: postgres:15.1
+    env_file: .env
+    ports:
+      - "5432:5432"
+
+  proxy:
+    image: nginx:1.22.1
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - web
